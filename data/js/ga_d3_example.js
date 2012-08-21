@@ -4,9 +4,12 @@
 // Constants
 var CONTAINER_WIDTH = 300; var CONTAINER_HEIGHT = 300;
 
+var test_array;
+
 // Base JS Logic
 function initialize() {
     render_visitor_graphic();
+    render_browser_graphic();
 }
 function render_visitor_graphic() {
     /**************************************************************************\
@@ -34,7 +37,7 @@ function render_visitor_graphic() {
                    "max-results": 1000
         },
         "itemsPerPage": 1000,
-        "totalResults": 2,
+        "totalResults": 10,
         "selfLink": "https://www.googleapis.com/analytics/v3/data/ga?ids=ga:63132366&dimensions=ga:visitorType&metrics=ga:visitors&start-date=2012-08-01&end-date=2012-08-19&start-index=1&max-results=1000",
         "profileInfo": {
              "profileId": "63132366",
@@ -91,17 +94,13 @@ function render_visitor_graphic() {
     | D3 Render                                                                |
     \**************************************************************************/
     // Circle Pack Visitor Response
-    var svg = d3.select("body")
+    var svg = d3.select("#visitor_graphic")
         .append("svg")
         .attr("width", CONTAINER_WIDTH)
         .attr("height", CONTAINER_HEIGHT)
         .style("padding", "40px");
     
-    var group = d3.select("svg")
-        .append("svg:g")
-        .attr("width", CONTAINER_WIDTH)
-        .attr("height", CONTAINER_HEIGHT)
-        .style("padding", "40px");
+    var group = svg.append("svg:g");
 
     // Total Text
     group.append("svg:text")
@@ -153,4 +152,98 @@ function render_visitor_graphic() {
         .attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; })
         .attr("r", function(d) { return d.r; });
+}
+
+function render_browser_graphic() {
+    /**************************************************************************\
+    | Variables                                                                |
+    \**************************************************************************/
+    var formatted_browser_response = {};
+
+    var browser_response = {
+             "kind": "analytics#gaData",
+              "id": "https://www.googleapis.com/analytics/v3/data/ga?ids=ga:63132366&dimensions=ga:browser,+ga:browserVersion&metrics=ga:visits&start-date=2012-08-01&end-date=2012-08-20&start-index=1&max-results=1000",
+               "query": {
+                     "start-date": "2012-08-01",
+                       "end-date": "2012-08-20",
+                         "ids": "ga:63132366",
+                           "dimensions": "ga:browser, ga:browserVersion",
+                             "metrics": [
+                                    "ga:visits"
+                                      ],
+                               "start-index": 1,
+                                 "max-results": 1000
+                                      },
+                "itemsPerPage": 1000,
+                 "totalResults": 10,
+                  "selfLink": "https://www.googleapis.com/analytics/v3/data/ga?ids=ga:63132366&dimensions=ga:browser,+ga:browserVersion&metrics=ga:visits&start-date=2012-08-01&end-date=2012-08-20&start-index=1&max-results=1000",
+                   "profileInfo": {
+                         "profileId": "63132366",
+                           "accountId": "34182323",
+                             "webPropertyId": "UA-34182323-1",
+                               "internalWebPropertyId": "61644851",
+                                 "profileName": "CNabors",
+                                   "tableId": "ga:63132366"
+                                        },
+                    "containsSampledData": false,
+                     "columnHeaders": [
+                           {
+                                  "name": "ga:browser",
+                                     "columnType": "DIMENSION",
+                                        "dataType": "STRING"
+                                              },
+                       {
+                              "name": "ga:browserVersion",
+                                 "columnType": "DIMENSION",
+                                    "dataType": "STRING"
+                                          },
+                         {
+                                "name": "ga:visits",
+                                   "columnType": "METRIC",
+                                      "dataType": "INTEGER"
+                                            }
+              ],
+                   "totalsForAllResults": {
+                         "ga:visits": "4"
+                              },
+                    "rows": [
+                          [
+                             "Chrome",
+                       "21.0.1180.57",
+                          "2"
+                                ],
+                            [
+                                   "Chrome",
+                               "21.0.1180.79",
+                                  "2"
+                                        ],
+                                    [
+                                           "Chrome",
+                                       "22.0.1229.8",
+                                          "4"
+                                                ],
+                                            [
+                                                   "Firefox",
+                                               "14.0.1",
+                                                  "2"
+                                                        ]
+                                                         ]
+    };
+    /**************************************************************************\
+    | Format Response                                                          |
+    \**************************************************************************/
+    formatted_browser_response['total_visits'] = parseInt(browser_response['totalResults']);
+    
+    var number_of_results = browser_response['rows'].length;
+    for(i = 0; i < number_of_results; i += 1) {
+        formatted_browser_response[(browser_response['rows'][i][0] + ":" + browser_response['rows'][i][1])] = [
+            browser_response['rows'][i][2]
+        ];
+    }
+    console.log(formatted_browser_response);
+
+    /**************************************************************************\
+    | D3 Render                                                                |
+    \**************************************************************************/
+    test_array = browser_response;
 }
