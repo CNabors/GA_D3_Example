@@ -232,18 +232,55 @@ function render_browser_graphic() {
     /**************************************************************************\
     | Format Response                                                          |
     \**************************************************************************/
-    formatted_browser_response['total_visits'] = parseInt(browser_response['totalResults']);
     
     var number_of_results = browser_response['rows'].length;
-    for(i = 0; i < number_of_results; i += 1) {
-        formatted_browser_response[(browser_response['rows'][i][0] + ":" + browser_response['rows'][i][1])] = [
-            browser_response['rows'][i][2]
-        ];
+    var domain_max = 0;
+
+    for(var i = 0; i < number_of_results; i += 1) {
+        var temp_browser = browser_response['rows'][i][0];
+        var temp_version = browser_response['rows'][i][1];
+        var temp_count = browser_response['rows'][i][2];
+
+        formatted_browser_response[temp_browser] = new Array();
+        
+        formatted_browser_response[temp_browser][temp_version] = parseInt(temp_count);
+
+        if(domain_max < browser_response['rows'][i][2]) {
+            domain_max = browser_response['rows'][i][2];
+        }
     }
-    console.log(formatted_browser_response);
+            
+    formatted_browser_response['total_visits'] = parseInt(browser_response['totalResults']);
 
     /**************************************************************************\
     | D3 Render                                                                |
     \**************************************************************************/
-    test_array = browser_response;
+    test_array = formatted_browser_response;
+    console.log(test_array);
+    console.log("Domain Max: " + domain_max);
+    
+    // Browser Response
+    var svg = d3.select("#browser_graphic")
+        .append("svg")
+        .attr("width", CONTAINER_WIDTH)
+        .attr("height", CONTAINER_HEIGHT);
+    
+    var x = d3.scale
+        .linear()
+        .domain([0, domain_max])
+        .range([0, CONTAINER_WIDTH]);
+
+    var group = svg.append("svg:g");
+    
+    var test_data = [1, 2, 2, 3, 4];
+    
+    group.selectAll("rect")
+        .data(formatted_browser_response)
+        .enter()
+        .append("rect")
+        .attr("y", function(d, i) { console.log("d: " + d + ", i: " + i); return i * 20; })
+        .attr("width", x)
+        .attr("height", 20);
+
+    
 }

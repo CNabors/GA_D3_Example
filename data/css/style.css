@@ -3,3 +3,8 @@ circle {
     fill: #62C219;
     stroke: #000;
 }
+
+rect {
+    stroke: white;
+    fill: steelblue;
+}
