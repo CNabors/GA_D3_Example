@@ -10,6 +10,7 @@ var test_array;
 function initialize() {
     render_visitor_graphic();
     render_browser_graphic();
+    render_resolution_graphic();
 }
 function render_visitor_graphic() {
     /**************************************************************************\
@@ -160,6 +161,7 @@ function render_browser_graphic() {
     \**************************************************************************/
     var formatted_browser_response = {};
     var domain_max = 0;
+    var browser_list = [];
 
     var browser_response = {
              "kind": "analytics#gaData",
@@ -234,7 +236,6 @@ function render_browser_graphic() {
     | Format Response                                                          |
     \**************************************************************************/
     var number_of_results = browser_response['rows'].length;
-    var browser_list = [];
 
     formatted_browser_response = browser_response['rows'];
 
@@ -252,9 +253,6 @@ function render_browser_graphic() {
     /**************************************************************************\
     | D3 Render                                                                |
     \**************************************************************************/
-    test_array = formatted_browser_response;
-    console.log(test_array);
-
     // Browser Response
     var svg = d3.select("#browser_graphic")
         .append("svg")
@@ -266,11 +264,6 @@ function render_browser_graphic() {
         .linear()
         .domain([0, domain_max])
         .range([0, CONTAINER_WIDTH]);
-
-    var y = d3.scale
-        .ordinal()
-        .domain([0, number_of_results])
-        .range([0, CONTAINER_HEIGHT]);
 
     var color_scale = d3.scale
         .ordinal()
@@ -307,4 +300,150 @@ function render_browser_graphic() {
         .attr("x", ((CONTAINER_WIDTH / 2) - 20))
         .attr("y", -15)
         .text("Browsers");
+}
+function render_resolution_graphic() {
+    /**************************************************************************\
+    | Variables                                                                |
+    \**************************************************************************/
+    var formatted_resolution_response = {};
+    var domain_max = 0;
+    var is_mobile = ["No", "Yes"];
+
+    var resolution_response = {
+         "kind": "analytics#gaData",
+          "id": "https://www.googleapis.com/analytics/v3/data/ga?ids=ga:63132366&dimensions=ga:isMobile,+ga:screenResolution&metrics=ga:visits&start-date=2012-08-01&end-date=2012-08-21&start-index=1&max-results=1000",
+           "query": {
+                 "start-date": "2012-08-01",
+                   "end-date": "2012-08-21",
+                     "ids": "ga:63132366",
+                       "dimensions": "ga:isMobile, ga:screenResolution",
+                         "metrics": [
+                                "ga:visits"
+                                  ],
+                           "start-index": 1,
+                             "max-results": 1000
+                                  },
+            "itemsPerPage": 1000,
+             "totalResults": 3,
+              "selfLink": "https://www.googleapis.com/analytics/v3/data/ga?ids=ga:63132366&dimensions=ga:isMobile,+ga:screenResolution&metrics=ga:visits&start-date=2012-08-01&end-date=2012-08-21&start-index=1&max-results=1000",
+               "profileInfo": {
+                     "profileId": "63132366",
+                       "accountId": "34182323",
+                         "webPropertyId": "UA-34182323-1",
+                           "internalWebPropertyId": "61644851",
+                             "profileName": "CNabors",
+                               "tableId": "ga:63132366"
+                                    },
+                "containsSampledData": false,
+                 "columnHeaders": [
+                       {
+                              "name": "ga:isMobile",
+                                 "columnType": "DIMENSION",
+                                    "dataType": "STRING"
+                                          },
+                   {
+                          "name": "ga:screenResolution",
+                             "columnType": "DIMENSION",
+                                "dataType": "STRING"
+                                      },
+                     {
+                            "name": "ga:visits",
+                               "columnType": "METRIC",
+                                  "dataType": "INTEGER"
+                                        }
+          ],
+               "totalsForAllResults": {
+                     "ga:visits": "12"
+                          },
+                "rows": [
+                      [
+                         "No",
+                   "1440x900",
+                      "4"
+                            ],
+                        [
+                               "No",
+                           "1920x1080",
+                              "5"
+                                    ],
+                                [
+                                       "Yes",
+                                   "320x480",
+                                      "3"
+                                            ]
+                                             ]
+    };
+
+    /**************************************************************************\
+    | Format Response                                                          |
+    \**************************************************************************/
+    var number_of_results = resolution_response['rows'].length;
+
+    formatted_resolution_response = resolution_response['rows'];
+
+    for(var i = 0; i < number_of_results; i += 1) {
+
+        if(domain_max < resolution_response['rows'][i][2]) {
+            domain_max = resolution_response['rows'][i][2];
+        }
+    }
+
+    /**************************************************************************\
+    | D3 Render                                                                |
+    \**************************************************************************/
+    console.log(formatted_resolution_response);
+    // Resolution Response
+    var svg = d3.select("#resolution_graphic")
+        .append("svg")
+        .attr("width", CONTAINER_WIDTH)
+        .attr("height", CONTAINER_HEIGHT)
+        .style("padding", "40px");
+    
+    var x = d3.scale
+        .linear()
+        .domain([0, domain_max])
+        .range([0, CONTAINER_WIDTH]);
+
+    var color_scale = d3.scale
+        .ordinal()
+        .domain(is_mobile)
+        .range(['#E5F5F9', '#2CA25F']);
+
+    var group = svg.append("svg:g");
+    
+    group.selectAll("rect")
+        .data(formatted_resolution_response)
+        .enter()
+        .append("svg:rect")
+        .attr("y", function(d, i) { return i * 35;  })
+        .attr("width", function(d) { return x(d[2]); })
+        .style("fill", function(d) { return color_scale(d[0]); })
+        .attr("height", 35);
+    
+    group.selectAll("text")
+        .data(formatted_resolution_response)
+        .enter()
+        .append("svg:text")
+        .attr("x", function(d) { return (x(d[2])); })
+        .attr("y", function(d, i) { return ((i * 35) + 20); })
+        .attr("dx", -3)
+        .attr("dy", ".35em")
+        .attr("text-anchor", "end")
+        .style("font-size", ".8em")
+        .text(function(d) {
+            if(d[0] === "Yes") {
+                return ("(" + d[2] + ")" + " Mobile: " + d[1]);
+            } else {
+                return ("(" + d[2] + ") " + d[1]); 
+            }
+        });
+
+    // Total Text
+    group.append("svg:text")
+        .attr("text-anchor", "middle")
+        .attr("dy", ".5em")
+        .attr("x", ((CONTAINER_WIDTH / 2) - 20))
+        .attr("y", -15)
+        .text("Resolution");
+
 }
