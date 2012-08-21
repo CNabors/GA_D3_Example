@@ -50,16 +50,16 @@ var visitor_response = {
                     }
     ],
         "totalsForAllResults": {
-             "ga:visitors": "2"
+             "ga:visitors": "10"
         },
         "rows": [
              [
                "New Visitor",
-          "1"
+          "3"
                ],
            [
                  "Returning Visitor",
-             "1"
+             "7"
                   ]
                   ]
 };
@@ -87,22 +87,57 @@ function render_visualization() {
     var svg = d3.select("body")
         .append("svg")
         .attr("width", CONTAINER_WIDTH)
-        .attr("height", CONTAINER_HEIGHT);
+        .attr("height", CONTAINER_HEIGHT)
+        .attr("style", "padding: 40px;");
+
+    // Total Text
+    svg.append("svg:text")
+        .attr("text-anchor", "middle")
+        .attr("dy", ".5em")
+        .attr("x", ((CONTAINER_WIDTH / 2) - 20))
+        .attr("y", -15)
+        .text(function(d) { return ("Total Visitors: " + formatted_visitor_response['total_visitors']); });
+    
+    // New Text
+    svg.append("svg:text")
+        .attr("text-anchor", "left")
+        .attr("dy", ".5em")
+        .attr("x", -40)
+        .attr("y", ((CONTAINER_HEIGHT / 2) - 20))
+        .text("New");
+    
+    // Returning Text
+    svg.append("svg:text")
+        .attr("text-anchor", "right")
+        .attr("dy", ".45em")
+        .attr("x", CONTAINER_WIDTH - 35)
+        .attr("y", ((CONTAINER_HEIGHT / 2) - 20))
+        .text("Returning");
 
     var pack = d3.layout
         .pack()
-        .size([CONTAINER_WIDTH, CONTAINER_HEIGHT]);
+        .size([CONTAINER_WIDTH - 40, CONTAINER_HEIGHT - 40]);
 
-    svg.selectAll("circle")
+    var circ = svg.selectAll("circle")
         .data(pack.nodes(circle_visitor_response))
-        .enter()
-        .append("circle")
-        .attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; })
-        .attr("r", function(d) { return d.r; })
-        .append("text")
+        .enter();
+    
+    circ.append("svg:text")
         .attr("text-anchor", "middle")
         .attr("dy", ".3em")
-        .text(function(d) { return d.value; });
+        .attr("y", function(d) { return d.y; })
+        .attr("x", function(d) { return d.x; })
+        .attr("r", function(d) { return d.r; })
+        .text(function(d) {
+            if(d.value === formatted_visitor_response['total_visitors']) {
+                return ""; 
+            } else {
+                return d.value; 
+            }
+        });
     
+    circ.append("svg:circle")
+        .attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; })
+        .attr("r", function(d) { return d.r; });
 }
