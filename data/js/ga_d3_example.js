@@ -159,6 +159,7 @@ function render_browser_graphic() {
     | Variables                                                                |
     \**************************************************************************/
     var formatted_browser_response = {};
+    var domain_max = 0;
 
     var browser_response = {
              "kind": "analytics#gaData",
@@ -232,24 +233,20 @@ function render_browser_graphic() {
     /**************************************************************************\
     | Format Response                                                          |
     \**************************************************************************/
-    
     var number_of_results = browser_response['rows'].length;
-    var domain_max = 0;
+    var browser_list = [];
+
+    formatted_browser_response = browser_response['rows'];
 
     for(var i = 0; i < number_of_results; i += 1) {
-        var temp_browser = browser_response['rows'][i][0];
-        var temp_version = browser_response['rows'][i][1];
-        var temp_count = browser_response['rows'][i][2];
 
-        formatted_browser_response[temp_browser] = new Array();
-        
-        formatted_browser_response[temp_browser][temp_version] = parseInt(temp_count);
+        browser_list.push(formatted_browser_response[i][0]);
 
         if(domain_max < browser_response['rows'][i][2]) {
             domain_max = browser_response['rows'][i][2];
         }
     }
-            
+    
     formatted_browser_response['total_visits'] = parseInt(browser_response['totalResults']);
 
     /**************************************************************************\
@@ -257,30 +254,57 @@ function render_browser_graphic() {
     \**************************************************************************/
     test_array = formatted_browser_response;
     console.log(test_array);
-    console.log("Domain Max: " + domain_max);
-    
+
     // Browser Response
     var svg = d3.select("#browser_graphic")
         .append("svg")
         .attr("width", CONTAINER_WIDTH)
-        .attr("height", CONTAINER_HEIGHT);
+        .attr("height", CONTAINER_HEIGHT)
+        .style("padding", "40px");
     
     var x = d3.scale
         .linear()
         .domain([0, domain_max])
         .range([0, CONTAINER_WIDTH]);
 
+    var y = d3.scale
+        .ordinal()
+        .domain([0, number_of_results])
+        .range([0, CONTAINER_HEIGHT]);
+
+    var color_scale = d3.scale
+        .ordinal()
+        .domain(browser_list)
+        .range(['#E5F5F9', '#2CA25F']);
+
     var group = svg.append("svg:g");
-    
-    var test_data = [1, 2, 2, 3, 4];
     
     group.selectAll("rect")
         .data(formatted_browser_response)
         .enter()
-        .append("rect")
-        .attr("y", function(d, i) { console.log("d: " + d + ", i: " + i); return i * 20; })
-        .attr("width", x)
-        .attr("height", 20);
-
+        .append("svg:rect")
+        .attr("y", function(d, i) { return i * 35;  })
+        .attr("width", function(d) { return x(d[2]); })
+        .style("fill", function(d) { return color_scale(d[0]); })
+        .attr("height", 35);
     
+    group.selectAll("text")
+        .data(formatted_browser_response)
+        .enter()
+        .append("svg:text")
+        .attr("x", function(d) { return (x(d[2])); })
+        .attr("y", function(d, i) { return ((i * 35) + 20); })
+        .attr("dx", -3)
+        .attr("dy", ".35em")
+        .attr("text-anchor", "end")
+        .style("font-size", ".8em")
+        .text(function(d) { return ("(" + d[2] + ") " + d[0] + ": " + d[1]); });
+
+    // Total Text
+    group.append("svg:text")
+        .attr("text-anchor", "middle")
+        .attr("dy", ".5em")
+        .attr("x", ((CONTAINER_WIDTH / 2) - 20))
+        .attr("y", -15)
+        .text("Browsers");
 }
