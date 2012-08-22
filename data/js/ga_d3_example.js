@@ -393,7 +393,6 @@ function render_resolution_graphic() {
     /**************************************************************************\
     | D3 Render                                                                |
     \**************************************************************************/
-    console.log(formatted_resolution_response);
     // Resolution Response
     var svg = d3.select("#resolution_graphic")
         .append("svg")
@@ -454,14 +453,130 @@ function render_language_graphic() {
     /**************************************************************************\
     | Variables                                                                |
     \**************************************************************************/
+    var formatted_language_response = {};
+    var origin_list = [];
+    var radius = (CONTAINER_HEIGHT / 2);
+
+    var language_response = {
+         "kind": "analytics#gaData",
+          "id": "https://www.googleapis.com/analytics/v3/data/ga?ids=ga:63132366&dimensions=ga:language,+ga:country&metrics=ga:visits&start-date=2012-08-01&end-date=2012-08-22&start-index=1&max-results=1000",
+           "query": {
+                 "start-date": "2012-08-01",
+                   "end-date": "2012-08-22",
+                     "ids": "ga:63132366",
+                       "dimensions": "ga:language, ga:country",
+                         "metrics": [
+                                "ga:visits"
+                                  ],
+                           "start-index": 1,
+                             "max-results": 1000
+                                  },
+            "itemsPerPage": 1000,
+             "totalResults": 3,
+              "selfLink": "https://www.googleapis.com/analytics/v3/data/ga?ids=ga:63132366&dimensions=ga:language,+ga:country&metrics=ga:visits&start-date=2012-08-01&end-date=2012-08-22&start-index=1&max-results=1000",
+               "profileInfo": {
+                     "profileId": "63132366",
+                       "accountId": "34182323",
+                         "webPropertyId": "UA-34182323-1",
+                           "internalWebPropertyId": "61644851",
+                             "profileName": "CNabors",
+                               "tableId": "ga:63132366"
+                                    },
+                "containsSampledData": false,
+                 "columnHeaders": [
+                       {
+                              "name": "ga:language",
+                                 "columnType": "DIMENSION",
+                                    "dataType": "STRING"
+                                          },
+                   {
+                          "name": "ga:country",
+                             "columnType": "DIMENSION",
+                                "dataType": "STRING"
+                                      },
+                     {
+                            "name": "ga:visits",
+                               "columnType": "METRIC",
+                                  "dataType": "INTEGER"
+                                        }
+          ],
+               "totalsForAllResults": {
+                     "ga:visits": "12"
+                          },
+                "rows": [
+                      [
+                         "en",
+                   "United States",
+                      "3"
+                            ],
+                        [
+                               "en-us",
+                           "United States",
+                              "8"
+                                    ],
+                                [
+                                       "it",
+                                   "Italy",
+                                      "1"
+                                            ]
+                                             ]
+    };
 
     /**************************************************************************\
     | Format Response                                                          |
     \**************************************************************************/
+    formatted_language_response = language_response['rows'];
+    formatted_language_response['total_visits'] = language_response['totalsForAllResults'];
+
+    var number_of_results = language_response['rows'].length;
+    for(var i = 0; i < number_of_results; i += 1) {
+        origin_list.push(formatted_language_response[i][0]);
+    }
+
+    console.log(formatted_language_response);
+    console.log(origin_list);
 
     /**************************************************************************\
     | D3 Render                                                                |
     \**************************************************************************/
+    var svg = d3.select("#language_graphic")
+        .append("svg:svg")
+        .data(formatted_language_response)
+        .attr("width", CONTAINER_WIDTH)
+        .attr("height", CONTAINER_HEIGHT)
+        .style("padding", "40px")
+        .append("svg:g")
+        .attr("transform", "translate(" + radius + "," + radius + ")");
+
+    var color_scale = d3.scale
+        .ordinal()
+        .domain(origin_list)
+        .range(['#E5F5F9', '#2CA25F']);
+    
+    var arc = d3.svg.arc()
+        .outerRadius(radius);
+    
+    var pie = d3.layout.pie()
+        .value(function(d) { return d[2]; });
+
+    var arcs = svg.selectAll("g.slice")
+        .data(pie)
+        .enter()
+        .append("svg:g")
+        .attr("class", "slice");
+
+    arcs.append("svg:path")
+        .attr("fill", function(d) { return color_scale(d[0]); })
+        .attr("d", arc);
+
+    arcs.append("svg:text")
+        .attr("transform", function(d) {
+            d.innerRadius = 0;
+            d.outerRadius = radius;
+            return "translate(" + arc.centroid(d[2]) + ")";
+        })
+        .attr("text-anchor", "middle")
+        .text(function(d) { return ("(" + d[2] + ")" + d[0] + ": " + d[1]); });
 }
 
 function render_load_graphic() {
