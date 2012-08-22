@@ -576,6 +576,7 @@ function render_language_graphic() {
             return "translate(" + arc.centroid(d[2]) + ")";
         })
         .attr("text-anchor", "middle")
+        // Ex - (2)en: United States
         .text(function(d) { return ("(" + d[2] + ")" + d[0] + ": " + d[1]); });
 }
 
