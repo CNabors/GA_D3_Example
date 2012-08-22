@@ -501,23 +501,23 @@ function render_language_graphic() {
                                         }
           ],
                "totalsForAllResults": {
-                     "ga:visits": "12"
+                     "ga:visits": "11"
                           },
                 "rows": [
                       [
                          "en",
                    "United States",
-                      "3"
+                      "4"
                             ],
                         [
                                "en-us",
                            "United States",
-                              "8"
+                              "4"
                                     ],
                                 [
                                        "it",
                                    "Italy",
-                                      "1"
+                                      "3"
                                             ]
                                              ]
     };
@@ -626,12 +626,12 @@ function render_load_graphic() {
           ],
                "totalsForAllResults": {
                      "ga:visits": "12",
-                       "ga:avgPageLoadTime": "0.0"
+                       "ga:avgPageLoadTime": "0.6"
                             },
                 "rows": [
                       [
                          "12",
-                   "0.0"
+                   "0.6"
                          ]
                           ]
     };
