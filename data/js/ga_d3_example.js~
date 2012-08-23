@@ -295,8 +295,12 @@ function render_browser_graphic() {
         .data(formatted_browser_response)
         .enter()
         .append("svg:text")
-        .attr("x", function(d, i) { console.log(x(i) - 0.5); return x(i) - 0.5;  })
-	.attr("y", function(d) { return (CONTAINER_HEIGHT - y(d[2]) - 0.5); })
+	.attr("x", function(d) {
+	    console.log((2 * x(d[2])) + CONTAINER_WIDTH);
+	    return (CONTAINER_WIDTH * -.53);
+	    //return ((2 * x(d[2])) + CONTAINER_WIDTH); 
+	})
+        .attr("y", function(d, i) { return (y(i) + (bar_width_max / 2));  })
         .attr("dx", -3)
         .attr("dy", ".35em")
         .attr("text-anchor", "end")
