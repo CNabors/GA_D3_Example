@@ -428,6 +428,7 @@ function render_resolution_graphic() {
         .attr("y", function(d, i) { return i * 35;  })
         .attr("width", function(d) { return x(d[2]); })
         .style("fill", function(d) { return color_scale(d[0]); })
+	.style("stroke", "black")
         .attr("height", 35);
     
     group.selectAll("text")
@@ -516,7 +517,7 @@ function render_language_graphic() {
                       [
                          "en",
                    "United States",
-                      "4"
+                      "5"
                             ],
                         [
                                "en-us",
@@ -536,12 +537,25 @@ function render_language_graphic() {
     \**************************************************************************/
     var number_of_results = language_response['rows'].length;
     for(var i = 0; i < number_of_results; i += 1) {
-        var temp_label = (language_response['rows'][i][0] + ":" + language_response['rows'][i][1]);
+        var temp_label = (language_response['rows'][i][0] + ": " + language_response['rows'][i][1]);
         var temp_value = (language_response['rows'][i][2]);
-        origin_list.push(temp_label);
-        formatted_data.push({"label": temp_label, "value":temp_value});
+	if(temp_label === "en-us: United States") {
+	    length_of_formatted_data = formatted_data.length;
+	    for(var y = 0; y < length_of_formatted_data; y += 1) {
+	        if(formatted_data[y].label === "en: United States") {
+		    var first_val = parseInt(formatted_data[y].value);
+		    var second_val = parseInt(temp_value);
+		    formatted_data[y].value = (first_val + second_val);
+		}
+	    }
+	} else {
+            origin_list.push(temp_label);
+            formatted_data.push({"label": temp_label, "value":temp_value});
+	}
     }
-
+    
+    test_array = formatted_data;
+    console.log(test_array);
     /**************************************************************************\
     | D3 Render                                                                |
     \**************************************************************************/
